@@ -8,7 +8,9 @@ const Wrapper = styled.button`
   justify-content: center;
   border-radius: 1rem;
   height: 4.8rem;
-  width: ${(props) => (props.fullWidth ? "100%" : props.width ?? "20rem")};
+  width: ${(props) =>
+    props.fullWidth ? "100%" : props.width ?? "max-content"};
+  padding: 0 2.4rem;
   background-color: ${(props) =>
     props.disabled ? "var(--grey_1)" : "var(--primary)"};
   color: var(--white);
@@ -19,6 +21,11 @@ const Wrapper = styled.button`
   letter-spacing: 0.75px;
   text-align: center;
   transition: background 250ms ease-in;
+
+  .icon {
+    height: 1.6rem;
+    margin-left: 1.2rem;
+  }
 
   &:hover {
     background-color: ${(props) =>
@@ -40,7 +47,7 @@ const Wrapper = styled.button`
     }
   }
 
-  &.link {
+  &.plain {
     background-color: transparent;
     border: none;
     color: ${(props) => (props.disabled ? "var(--grey_1)" : "var(--primary)")};
@@ -68,6 +75,8 @@ const Button = ({
   rel,
   onClick,
   loading,
+  hasIcon,
+  icon,
 }) => {
   const styleProps = {
     className,
@@ -83,7 +92,12 @@ const Button = ({
     rel,
     onClick,
   };
-  return <Wrapper {...styleProps}>{loading ? "..." : text}</Wrapper>;
+  return (
+    <Wrapper {...styleProps}>
+      <span>{loading ? "..." : text}</span>
+      {hasIcon && icon && <img src={icon} alt="icon" className="icon" />}
+    </Wrapper>
+  );
 };
 
 Button.propTypes = {
@@ -97,6 +111,8 @@ Button.propTypes = {
   type: PropTypes.string,
   width: PropTypes.string,
   loading: PropTypes.bool,
+  hasIcon: PropTypes.bool,
+  icon: PropTypes.string,
 };
 
 export default Button;

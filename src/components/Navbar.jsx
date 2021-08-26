@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import searchIcon from "assets/searchIcon.svg";
 import userIcon from "assets/userIcon.svg";
 import chevronDown from "assets/chevronDown.svg";
-import { Backdrop } from "pages/Dashboard";
+import Backdrop from "./Backdrop";
 
 const Wrapper = styled.nav`
   width: 100%;

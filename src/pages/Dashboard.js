@@ -2,6 +2,7 @@ import Sidebar from "components/Sidebar";
 import { Route, Switch } from "react-router";
 import styled from "styled-components";
 import Home from "views/Home";
+import Orders from "views/Orders";
 
 const Wrapper = styled.div`
   display: grid;
@@ -14,24 +15,6 @@ const Wrapper = styled.div`
   }
 `;
 
-export const Backdrop = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 100vw;
-  background-color: ${(props) =>
-    props.transparent ? "transparent" : "#00000020"};
-  opacity: 0;
-  pointer-events: none;
-  z-index: 5;
-
-  &.show {
-    opacity: 1;
-    pointer-events: all;
-  }
-`;
-
 const Dashboard = () => {
   return (
     <Wrapper>
@@ -39,6 +22,7 @@ const Dashboard = () => {
       <div className="content">
         <Switch>
           <Route exact path="/dashboard" component={Home} />
+          <Route exact path="/dashboard/orders" component={Orders} />
         </Switch>
       </div>
     </Wrapper>

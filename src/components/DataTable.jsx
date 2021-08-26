@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import CheckBox from "./CheckBox";
 import deleteIcon from "assets/deleteIconWhite.svg";
@@ -6,6 +6,9 @@ import downloadIcon from "assets/downloadIconWhite.svg";
 import chevronDown from "assets/chevronDownSlim.svg";
 import nextIcon from "assets/nextIcon.svg";
 import prevIcon from "assets/prevIcon.svg";
+import closeIcon from "assets/closeWhite.svg";
+import Button from "./Button";
+import Backdrop from "./Backdrop";
 
 const Wrapper = styled.div`
   background-color: transparent;
@@ -60,7 +63,6 @@ const Inner = styled.table`
     padding: 1.8rem 1rem;
     text-align: left;
     color: var(--text);
-    text-transform: capitalize;
     font-size: 14px;
     font-weight: 500;
     line-height: 18px;
@@ -135,16 +137,83 @@ const Pagination = styled.div`
   }
 `;
 
+const RowDetails = styled(Backdrop)`
+  opacity: 1;
+  pointer-events: all;
+
+  .contentWrapper {
+    width: 52rem;
+    margin: 12rem auto;
+  }
+
+  .header {
+    background-color: var(--primary);
+    padding: 1.8rem 2.4rem;
+    color: var(--white);
+    border-radius: 1rem 1rem 0 0;
+
+    button {
+      width: max-content;
+    }
+
+    .text {
+      text-transform: capitalize;
+    }
+
+    .icon {
+      height: 2rem;
+    }
+  }
+
+  .details {
+    background-color: var(--white);
+    padding: 2.4rem;
+    border-radius: 0 0 1rem 1rem;
+  }
+
+  .rowItem {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-gap: 1.2rem;
+    margin-bottom: 2.4rem;
+  }
+
+  .exportBtn {
+    font-size: 14px;
+    line-height: 18px;
+  }
+`;
+
+const DeleteModal = styled(Backdrop)`
+  opacity: 1;
+  pointer-events: all;
+
+  .contentWrapper {
+    width: 32rem;
+    margin: 12rem auto;
+    text-align: center;
+    padding: 4.8rem 3.2rem;
+    border-radius: 1rem;
+    background-color: var(--white);
+  }
+
+  .actionBtns {
+    margin-top: 2.4rem;
+  }
+`;
+
 const DataTable = (props) => {
   const [selectedContentIds, setSelectedContentIds] = useState([]);
+  const [rowDetails, setRowDetails] = useState({});
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const {
+    title,
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
-    handleRowClick,
     page,
     nextPage,
     previousPage,
@@ -199,7 +268,7 @@ const DataTable = (props) => {
     setSelectedContentIds(newSelectedContentIds);
   };
 
-  // useEffect(() => console.log(page), []);
+  // useEffect(() => console.log(rows), []);
 
   const numSequence = (max) => {
     let arr = [];
@@ -214,6 +283,53 @@ const DataTable = (props) => {
   return (
     <>
       <Wrapper>
+        {confirmDelete && (
+          <DeleteModal>
+            <div className="contentWrapper">
+              <h5>Delete selected items?</h5>
+              <div className="actionBtns row justify-space-between">
+                <Button
+                  text="Cancel"
+                  width="50%"
+                  onClick={() => setConfirmDelete(false)}
+                />
+                <Button text="Delete" width="50%" className="plain" />
+              </div>
+            </div>
+          </DeleteModal>
+        )}
+        {!!Object.keys(rowDetails).length && (
+          <RowDetails>
+            <div className="contentWrapper">
+              <div className="header row align-center justify-space-between">
+                <span className="sup text">{title ?? "row"} details</span>
+                <button onClick={() => setRowDetails({})}>
+                  <img src={closeIcon} alt="Close" className="icon" />
+                </button>
+              </div>
+              <div className="details">
+                {Object.keys(rowDetails.values).map((item, index) => (
+                  <div key={item} className="rowItem">
+                    <span className="sup">
+                      {rowDetails.cells[index].column.Header}
+                      {rowDetails.cells[index].column.Header === "Amount" &&
+                        " Paid"}
+                    </span>
+                    <span className="sup">{rowDetails.values[item]}</span>
+                  </div>
+                ))}
+                <div className="row justify-end">
+                  <Button
+                    className="exportBtn"
+                    text="Export"
+                    icon={downloadIcon}
+                    hasIcon
+                  />
+                </div>
+              </div>
+            </div>
+          </RowDetails>
+        )}
         {!!selectedContentIds.length && (
           <Actions>
             <div className="col">
@@ -227,7 +343,7 @@ const DataTable = (props) => {
                 <span>Export</span>
                 <img src={downloadIcon} alt="Arrow down" className="icon" />
               </button>
-              <button className="item">
+              <button className="item" onClick={() => setConfirmDelete(true)}>
                 <span>Delete</span>
                 <img src={deleteIcon} alt="Bin" className="icon" />
               </button>
@@ -260,19 +376,14 @@ const DataTable = (props) => {
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
-            {page.map((row, index) => {
+            {page.map((row) => {
               prepareRow(row);
               return (
                 <tr
                   {...row.getRowProps()}
-                  onClick={(e) =>
-                    handleRowClick(
-                      e,
-                      `/${row.values.name}`,
-                      row.values.id,
-                      index
-                    )
-                  }
+                  onClick={() => {
+                    setRowDetails(row);
+                  }}
                 >
                   <td className="checkbox">
                     <CheckBox
