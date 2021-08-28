@@ -8,7 +8,7 @@ const Wrapper = styled.div`
   flex-direction: column-reverse;
   justify-content: center;
   background-color: var(--white);
-  border-radius: 1rem;
+  border-radius: 0.4rem;
   padding: ${(props) =>
     props.fieldStyle === "dropdown"
       ? 0
@@ -20,6 +20,7 @@ const Wrapper = styled.div`
   border: ${(props) =>
     props.fieldStyle === "dropdown" ? "none" : "1px solid var(--border_color)"};
   position: relative;
+  z-index: 1;
 
   input,
   textarea,

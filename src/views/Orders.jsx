@@ -1,4 +1,5 @@
 import DashboardContent from "components/DashboardContent";
+import MOCK_DATA from "utils/MOCK_DATA";
 
 const COLUMNS = [
   {
@@ -32,7 +33,14 @@ const COLUMNS = [
 ];
 
 const Orders = () => {
-  return <DashboardContent columns={COLUMNS} />;
+  return (
+    <DashboardContent
+      columns={COLUMNS}
+      data={MOCK_DATA}
+      title="Orders"
+      collectionType="order"
+    />
+  );
 };
 
 export default Orders;

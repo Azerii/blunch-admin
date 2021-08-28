@@ -69,7 +69,7 @@ const COLUMNS = [
 
 const Home = () => {
   return (
-    <DashboardContent columns={COLUMNS}>
+    <DashboardContent columns={COLUMNS} title="order">
       <Wrapper>
         {/* Orders due today */}
         <OverviewCard>

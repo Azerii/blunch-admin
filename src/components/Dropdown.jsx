@@ -1,12 +1,12 @@
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import chevron_down from "../assets/chevron_down.svg";
+import chevron_down from "assets/chevron_down.svg";
 
 const DropdownWrapper = styled.div`
   width: 100%;
   position: relative;
 
-  .locationInput {
+  .selectInput {
     display: block;
     color: var(--text);
     width: 80%;
@@ -18,6 +18,7 @@ const DropdownWrapper = styled.div`
     line-height: 18px;
     letter-spacing: 0px;
     color: var(--sup_text);
+    pointer-events: none;
 
     &::placeholder {
       color: ${(props) =>
@@ -29,13 +30,14 @@ const DropdownWrapper = styled.div`
     width: 100%;
     height: 4.8rem;
     border 1px solid var(--border_color);
-    border-radius: 1rem;
+    border-radius: 0.4rem;
     padding: 0 1.6rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     color: var(--sup_text);
     background-color: var(--white);
+    cursor: pointer;
   }
 
   .toggleIcon {
@@ -51,13 +53,14 @@ const DropdownWrapper = styled.div`
     position: absolute;
     top: 3rem;
     left: 0;
-    padding: 2.4rem 0;
+    // padding: 2.4rem 0;
     background-color: var(--white);
     border-radius: 1rem;
     box-shadow: 0px 0px 5px var(--background);
     opacity: 0;
     pointer-events: none;
     transition: all .2s ease-out;
+    z-index: 5;
   }
 
   .listItem {
@@ -105,20 +108,18 @@ const DropdownWrapper = styled.div`
 const Dropdown = ({
   className,
   name,
+  placeholder,
   value,
   setValue,
   list,
-  hasIcon,
-  icon,
-  id,
   readOnly,
 }) => {
   const toggleList = (open) => {
     if (readOnly) return;
 
     open
-      ? document.querySelector(`#${id}`).classList.add("isOpen")
-      : document.querySelector(`#${id}`).classList.remove("isOpen");
+      ? document.querySelector(`#${name}`).classList.add("isOpen")
+      : document.querySelector(`#${name}`).classList.remove("isOpen");
   };
 
   const handleSelect = (e, l) => {
@@ -129,49 +130,37 @@ const Dropdown = ({
   };
 
   return (
-    <DropdownWrapper
-      id={id}
-      className={`dWrapper${hasIcon ? " hasIcon" : ""} ${className ?? ""}`}
-    >
-      <div className="header">
-        {hasIcon && icon && <img src={icon} alt="icon" className="iconLeft" />}
+    <DropdownWrapper id={name} className={`dWrapper ${className ?? ""}`}>
+      <div
+        className="header"
+        onClick={() =>
+          document.querySelector(`#${name}`).classList.toggle("isOpen")
+        }
+      >
         {/* <p className="sup title">{value}</p> */}
         <input
           type="text"
           name={name}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="locationInput"
-          placeholder="Select your location"
+          className="selectInput"
+          placeholder={placeholder}
           onFocus={() => toggleList(true)}
           readOnly={readOnly}
         />
-        {!hasIcon && (
-          <img
-            src={chevron_down}
-            alt="down"
-            className="toggleIcon"
-            onClick={() =>
-              document.querySelector(`#${id}`).classList.toggle("isOpen")
-            }
-          />
-        )}
+        <img src={chevron_down} alt="down" className="toggleIcon" />
       </div>
       <div className="list">
         {!!list?.length &&
-          list
-            .filter((location) =>
-              location.name.toLowerCase().match(value.toLowerCase())
-            )
-            .map((item) => (
-              <button
-                key={item.id}
-                className="listItem sup"
-                onClick={(e) => handleSelect(e, item.name)}
-              >
-                {item.name}
-              </button>
-            ))}
+          list.map((item) => (
+            <button
+              key={item}
+              className="listItem sup"
+              onClick={(e) => handleSelect(e, item)}
+            >
+              {item}
+            </button>
+          ))}
       </div>
     </DropdownWrapper>
   );
@@ -179,13 +168,13 @@ const Dropdown = ({
 
 Dropdown.propTypes = {
   className: PropTypes.string,
-  name: PropTypes.string,
-  value: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
+  value: PropTypes.string.isRequired,
   setValue: PropTypes.func.isRequired,
   list: PropTypes.array,
   hasIcon: PropTypes.bool,
   icon: PropTypes.any,
-  id: PropTypes.string.isRequired,
   readOnly: PropTypes.bool,
 };
 

@@ -2,6 +2,7 @@ import Sidebar from "components/Sidebar";
 import { Route, Switch } from "react-router";
 import styled from "styled-components";
 import Home from "views/Home";
+import Meals from "views/Meals";
 import Orders from "views/Orders";
 
 const Wrapper = styled.div`
@@ -23,6 +24,7 @@ const Dashboard = () => {
         <Switch>
           <Route exact path="/dashboard" component={Home} />
           <Route exact path="/dashboard/orders" component={Orders} />
+          <Route exact path="/dashboard/meals" component={Meals} />
         </Switch>
       </div>
     </Wrapper>

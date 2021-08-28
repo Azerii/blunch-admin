@@ -9,6 +9,11 @@ import prevIcon from "assets/prevIcon.svg";
 import closeIcon from "assets/closeWhite.svg";
 import Button from "./Button";
 import Backdrop from "./Backdrop";
+import FormGroup from "./FormGroup";
+import Dropdown from "./Dropdown";
+import uploadCloud from "assets/uploadCloud.svg";
+import plusIcon from "assets/plusIcon.svg";
+import Spacer from "./Spacer";
 
 const Wrapper = styled.div`
   background-color: transparent;
@@ -70,8 +75,20 @@ const Inner = styled.table`
   }
 
   .checkbox {
-    padding: 0 2.4rem;
+    padding-left: 2.4rem;
+    width: 5rem;
   }
+
+  .img {
+    height: 4.8rem;
+  }
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.4rem;
 `;
 
 const Actions = styled.div`
@@ -135,6 +152,11 @@ const Pagination = styled.div`
   #pageIndex {
     padding: 0 1.6rem;
   }
+
+  button:disabled {
+    background-color: var(--background);
+    cursor: default;
+  }
 `;
 
 const RowDetails = styled(Backdrop)`
@@ -176,6 +198,7 @@ const RowDetails = styled(Backdrop)`
     grid-template-columns: 1fr 2fr;
     grid-gap: 1.2rem;
     margin-bottom: 2.4rem;
+    overflow-wrap: anywhere;
   }
 
   .exportBtn {
@@ -202,13 +225,128 @@ const DeleteModal = styled(Backdrop)`
   }
 `;
 
+const FormWrapper = styled(Backdrop)`
+  opacity: 1;
+  pointer-events: all;
+
+  .contentWrapper {
+    width: 52rem;
+    margin: 12rem auto;
+    padding: 2.4rem;
+    border-radius: 1rem;
+    background-color: var(--white);
+    display: grid;
+    grid-gap: 2.4rem;
+  }
+
+  .dropZone {
+    height: 14.4rem;
+    background-color: #efefef;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.8rem;
+
+    .prompt {
+      color: var(--sup_text);
+    }
+
+    .browse {
+      cursor: pointer;
+    }
+  }
+
+  .attachment {
+    display: grid;
+    grid-template-columns: 10rem 2fr 1fr;
+    grid-gap: 2.4rem;
+    align-items: center;
+    padding: 1.6rem 2.4rem;
+
+    .imgWrapper {
+      width: 100%;
+      height: 10rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      border-radius: 0.4rem;
+
+      img {
+        height: 100%;
+      }
+    }
+
+    .imgDetails {
+      color: var(--sup_text);
+      overflow: hidden;
+      max-width: 90%;
+
+      .text {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+    }
+
+    .change {
+      color: var(--danger);
+      text-align: right;
+
+      .prompt {
+        cursor: pointer;
+      }
+    }
+  }
+
+  #photoInput {
+    display: none;
+  }
+
+  .uploadIcon {
+    height: 2.4rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .textUnderline {
+    text-decoration: underline;
+  }
+`;
+
+const days = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
+
+const numSequence = (max) => {
+  let arr = [];
+
+  for (let i = 0; i < max; i++) {
+    arr[i] = i + 1;
+  }
+
+  return arr;
+};
+
 const DataTable = (props) => {
   const [selectedContentIds, setSelectedContentIds] = useState([]);
   const [rowDetails, setRowDetails] = useState({});
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [selectedDay, setSelectedDay] = useState("");
+  const [mealImgDetails, setMealImgDetails] = useState(false);
+  const [activeFieldVal, setActiveFieldVal] = useState("");
+  const [couponType, setCouponType] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
 
   const {
     title,
+    collectionType,
+    canAdd,
     getTableProps,
     getTableBodyProps,
     headerGroups,
@@ -268,17 +406,26 @@ const DataTable = (props) => {
     setSelectedContentIds(newSelectedContentIds);
   };
 
-  // useEffect(() => console.log(rows), []);
-
-  const numSequence = (max) => {
-    let arr = [];
-
-    for (let i = 0; i < max; i++) {
-      arr[i] = i + 1;
+  const loadFile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setMealImgDetails(file);
+      // console.log(file);
+      // const url = URL.createObjectURL(file);
+      // const photoOutput = document.querySelector("#photoOutput");
+      // photoOutput.src = url;
     }
-
-    return arr;
   };
+
+  const getMediaSize = (size) => {
+    return size < 1024
+      ? `${size.toFixed(1)} b`
+      : size > 1024 && size < 1024 * 1024
+      ? `${(size / 1024).toFixed(1)} kb`
+      : `${(size / 1024 / 1024).toFixed(1)} mb`;
+  };
+
+  useEffect(() => console.log(rows), []);
 
   return (
     <>
@@ -293,7 +440,7 @@ const DataTable = (props) => {
                   width="50%"
                   onClick={() => setConfirmDelete(false)}
                 />
-                <Button text="Delete" width="50%" className="plain" />
+                <Button text="Delete" width="50%" className="plain textDark" />
               </div>
             </div>
           </DeleteModal>
@@ -302,7 +449,9 @@ const DataTable = (props) => {
           <RowDetails>
             <div className="contentWrapper">
               <div className="header row align-center justify-space-between">
-                <span className="sup text">{title ?? "row"} details</span>
+                <span className="sup text">
+                  {collectionType ?? "row"} details
+                </span>
                 <button onClick={() => setRowDetails({})}>
                   <img src={closeIcon} alt="Close" className="icon" />
                 </button>
@@ -323,12 +472,171 @@ const DataTable = (props) => {
                     className="exportBtn"
                     text="Export"
                     icon={downloadIcon}
-                    hasIcon
                   />
                 </div>
               </div>
             </div>
           </RowDetails>
+        )}
+        {showAdd && (
+          <FormWrapper>
+            <form className="contentWrapper">
+              <h5>Add new {collectionType}</h5>
+
+              {/* Meal */}
+              {collectionType?.toLowerCase() === "meal" && (
+                <>
+                  <FormGroup
+                    fieldStyle="shortText"
+                    name="name"
+                    placeholder="Meal name"
+                  />
+                  <FormGroup
+                    fieldStyle="shortText"
+                    inputType="number"
+                    name="price"
+                    placeholder="Price"
+                  />
+                  <Dropdown
+                    name="day"
+                    list={days}
+                    value={selectedDay}
+                    setValue={setSelectedDay}
+                    placeholder="Day"
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="photoInput"
+                    onChange={(e) => loadFile(e)}
+                  />
+                  {!mealImgDetails && (
+                    <div className="dropZone">
+                      <img
+                        src={uploadCloud}
+                        alt="upload"
+                        className="uploadIcon"
+                      />
+                      <p className="sup prompt">
+                        Drag &amp; drop or{" "}
+                        <span
+                          className="textUnderline browse"
+                          onClick={() =>
+                            document.querySelector("#photoInput").click()
+                          }
+                        >
+                          browse
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  {mealImgDetails && (
+                    <div className="attachment">
+                      <div className="imgWrapper">
+                        <img
+                          src={URL.createObjectURL(mealImgDetails)}
+                          alt="meal"
+                          id="photoOutput"
+                        />
+                      </div>
+                      <div className="imgDetails">
+                        <h5 className="text">{mealImgDetails.name}</h5>
+                        <Spacer y={1.2} />
+                        <p className="small">
+                          {getMediaSize(mealImgDetails.size)}
+                        </p>
+                      </div>
+                      <div className="change">
+                        <span
+                          className="textUnderline prompt"
+                          onClick={() =>
+                            document.querySelector("#photoInput").click()
+                          }
+                        >
+                          Change
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Location */}
+              {collectionType?.toLowerCase() === "location" && (
+                <>
+                  <FormGroup
+                    fieldStyle="shortText"
+                    name="name"
+                    placeholder="Location name"
+                  />
+                  <FormGroup
+                    fieldStyle="shortText"
+                    inputType="number"
+                    name="price"
+                    placeholder="Price"
+                  />
+                  <Dropdown
+                    name="active"
+                    list={[0, 1]}
+                    value={activeFieldVal}
+                    setValue={setActiveFieldVal}
+                    placeholder="Active"
+                  />
+                </>
+              )}
+
+              {/* Coupon */}
+              {collectionType?.toLowerCase() === "coupon" && (
+                <>
+                  <FormGroup
+                    fieldStyle="shortText"
+                    name="name"
+                    placeholder="Coupon name"
+                  />
+                  <FormGroup
+                    fieldStyle="shortText"
+                    name="code"
+                    placeholder="Coupon code"
+                  />
+                  <FormGroup
+                    fieldStyle="shortText"
+                    name="expires"
+                    placeholder="Duration (in days)"
+                  />
+                  <Dropdown
+                    name="type"
+                    list={["delivery"]}
+                    value={couponType}
+                    setValue={setCouponType}
+                    placeholder="Coupon type"
+                  />
+                </>
+              )}
+
+              <div className="row">
+                <Button
+                  type="button"
+                  text="Cancel"
+                  width="50%"
+                  className="plain textDark"
+                  onClick={() => setShowAdd(false)}
+                />
+                <Button type="submit" text="Save" width="50%" />
+              </div>
+            </form>
+          </FormWrapper>
+        )}
+        {title && (
+          <Header>
+            <h1>{title}</h1>
+            {canAdd && (
+              <Button
+                text={`Add ${collectionType}`}
+                icon={plusIcon}
+                onClick={() => setShowAdd(true)}
+              />
+            )}
+          </Header>
         )}
         {!!selectedContentIds.length && (
           <Actions>
@@ -393,7 +701,17 @@ const DataTable = (props) => {
                     />
                   </td>
                   {row.cells.map((cell) => (
-                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                    <td {...cell.getCellProps()}>
+                      {cell.column.Header === "Image" ? (
+                        <img
+                          src={cell.value}
+                          alt={row.values.name}
+                          className="img"
+                        />
+                      ) : (
+                        cell.render("Cell")
+                      )}
+                    </td>
                   ))}
                 </tr>
               );

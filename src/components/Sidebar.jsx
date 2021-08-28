@@ -69,9 +69,9 @@ const Sidebar = () => {
           <img src={menuIcon} alt="Menu icon" className="icon" />
           <span className="sup text">Orders</span>
         </NavLink>
-        <NavLink to="/dashboard/products" className="item">
+        <NavLink to="/dashboard/meals" className="item">
           <img src={bagIcon} alt="shopping bag icon" className="icon" />
-          <span className="sup text">Products</span>
+          <span className="sup text">Meals</span>
         </NavLink>
         <NavLink to="/dashboard/locations" className="item">
           <img src={locationIcon} alt="Map pin" className="icon" />

@@ -2,7 +2,6 @@ import DataTable from "components/DataTable";
 import styled from "styled-components";
 import { useTable, useGlobalFilter, usePagination } from "react-table";
 import Navbar from "components/Navbar";
-import MOCK_DATA from "utils/MOCK_DATA";
 
 const Wrapper = styled.div`
   padding: 4.8rem;
@@ -10,9 +9,11 @@ const Wrapper = styled.div`
 
 const DashboardContent = ({
   children,
-  data = MOCK_DATA,
+  data = [],
   columns = [],
   title,
+  collectionType,
+  canAdd,
 }) => {
   const {
     getTableProps,
@@ -44,6 +45,8 @@ const DashboardContent = ({
 
   const tableProps = {
     title,
+    collectionType,
+    canAdd,
     getTableProps,
     getTableBodyProps,
     headerGroups,

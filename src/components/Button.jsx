@@ -59,6 +59,10 @@ const Wrapper = styled.button`
         props.disabled ? "var(--grey_1)" : "var(--primary_dark)"};
     }
   }
+
+  &.textDark {
+    color: var(--text);
+  }
 `;
 
 const Button = ({
@@ -75,7 +79,6 @@ const Button = ({
   rel,
   onClick,
   loading,
-  hasIcon,
   icon,
 }) => {
   const styleProps = {
@@ -95,7 +98,7 @@ const Button = ({
   return (
     <Wrapper {...styleProps}>
       <span>{loading ? "..." : text}</span>
-      {hasIcon && icon && <img src={icon} alt="icon" className="icon" />}
+      {icon && <img src={icon} alt="icon" className="icon" />}
     </Wrapper>
   );
 };
@@ -111,7 +114,6 @@ Button.propTypes = {
   type: PropTypes.string,
   width: PropTypes.string,
   loading: PropTypes.bool,
-  hasIcon: PropTypes.bool,
   icon: PropTypes.string,
 };
 
