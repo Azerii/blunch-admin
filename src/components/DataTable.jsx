@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import CheckBox from "./CheckBox";
 import deleteIcon from "assets/deleteIconWhite.svg";
@@ -14,6 +14,8 @@ import Dropdown from "./Dropdown";
 import uploadCloud from "assets/uploadCloud.svg";
 import plusIcon from "assets/plusIcon.svg";
 import Spacer from "./Spacer";
+import MultiSelect from "./MultiSelect";
+import { API_HOST_MAIN } from "utils/config";
 
 const Wrapper = styled.div`
   background-color: transparent;
@@ -337,16 +339,20 @@ const DataTable = (props) => {
   const [selectedContentIds, setSelectedContentIds] = useState([]);
   const [rowDetails, setRowDetails] = useState({});
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [selectedDay, setSelectedDay] = useState("");
+  const [selectedDays, setSelectedDays] = useState("");
+  const [selectedLocations, setSelectedLocations] = useState("");
   const [mealImgDetails, setMealImgDetails] = useState(false);
   const [activeFieldVal, setActiveFieldVal] = useState("");
   const [couponType, setCouponType] = useState("");
   const [showAdd, setShowAdd] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const {
     title,
     collectionType,
-    canAdd,
+    handleAdd,
+    handleEdit,
+    submitting,
     getTableProps,
     getTableBodyProps,
     headerGroups,
@@ -362,6 +368,7 @@ const DataTable = (props) => {
     pageCount,
     pageSize,
     setPageSize,
+    extra,
   } = props;
 
   const handleSelectAll = (event) => {
@@ -410,22 +417,35 @@ const DataTable = (props) => {
     const file = e.target.files[0];
     if (file) {
       setMealImgDetails(file);
-      // console.log(file);
-      // const url = URL.createObjectURL(file);
-      // const photoOutput = document.querySelector("#photoOutput");
-      // photoOutput.src = url;
     }
   };
 
-  const getMediaSize = (size) => {
-    return size < 1024
+  const getFileSize = (size) => {
+    return size < 1000
       ? `${size.toFixed(1)} b`
-      : size > 1024 && size < 1024 * 1024
-      ? `${(size / 1024).toFixed(1)} kb`
-      : `${(size / 1024 / 1024).toFixed(1)} mb`;
+      : size > 1000 && size < 1000 * 1000
+      ? `${(size / 1000).toFixed(1)} kb`
+      : `${(size / 1000 / 1000).toFixed(1)} mb`;
   };
 
-  useEffect(() => console.log(rows), []);
+  const handleRowClick = (row) => {
+    setRowDetails(row);
+    if (handleEdit) {
+      setShowEdit(true);
+    }
+  };
+
+  const handleCancelAdd = () => {
+    setShowAdd(false);
+    setMealImgDetails(false);
+    setRowDetails({});
+  };
+
+  const handleCancelEdit = () => {
+    setShowEdit(false);
+    setMealImgDetails(false);
+    setRowDetails({});
+  };
 
   return (
     <>
@@ -445,7 +465,7 @@ const DataTable = (props) => {
             </div>
           </DeleteModal>
         )}
-        {!!Object.keys(rowDetails).length && (
+        {!!Object.keys(rowDetails).length && !handleEdit && (
           <RowDetails>
             <div className="contentWrapper">
               <div className="header row align-center justify-space-between">
@@ -478,9 +498,11 @@ const DataTable = (props) => {
             </div>
           </RowDetails>
         )}
+
+        {/* Create record */}
         {showAdd && (
           <FormWrapper>
-            <form className="contentWrapper">
+            <form className="contentWrapper" onSubmit={handleAdd}>
               <h5>Add new {collectionType}</h5>
 
               {/* Meal */}
@@ -497,12 +519,12 @@ const DataTable = (props) => {
                     name="price"
                     placeholder="Price"
                   />
-                  <Dropdown
-                    name="day"
+                  <MultiSelect
+                    name="days"
                     list={days}
-                    value={selectedDay}
-                    setValue={setSelectedDay}
-                    placeholder="Day"
+                    value={selectedDays}
+                    setValue={setSelectedDays}
+                    placeholder="Days"
                   />
                   <input
                     type="file"
@@ -543,7 +565,7 @@ const DataTable = (props) => {
                         <h5 className="text">{mealImgDetails.name}</h5>
                         <Spacer y={1.2} />
                         <p className="small">
-                          {getMediaSize(mealImgDetails.size)}
+                          {getFileSize(mealImgDetails.size)}
                         </p>
                       </div>
                       <div className="change">
@@ -572,15 +594,8 @@ const DataTable = (props) => {
                   <FormGroup
                     fieldStyle="shortText"
                     inputType="number"
-                    name="price"
-                    placeholder="Price"
-                  />
-                  <Dropdown
-                    name="active"
-                    list={[0, 1]}
-                    value={activeFieldVal}
-                    setValue={setActiveFieldVal}
-                    placeholder="Active"
+                    name="delivery_price"
+                    placeholder="Price (NGN)"
                   />
                 </>
               )}
@@ -601,7 +616,7 @@ const DataTable = (props) => {
                   <FormGroup
                     fieldStyle="shortText"
                     name="expires"
-                    placeholder="Duration (in days)"
+                    placeholder="Expires (in days)"
                   />
                   <Dropdown
                     name="type"
@@ -609,6 +624,13 @@ const DataTable = (props) => {
                     value={couponType}
                     setValue={setCouponType}
                     placeholder="Coupon type"
+                  />
+                  <MultiSelect
+                    name="locations"
+                    list={extra?.locations || []}
+                    value={selectedLocations}
+                    setValue={setSelectedLocations}
+                    placeholder="Days"
                   />
                 </>
               )}
@@ -619,17 +641,231 @@ const DataTable = (props) => {
                   text="Cancel"
                   width="50%"
                   className="plain textDark"
-                  onClick={() => setShowAdd(false)}
+                  onClick={handleCancelAdd}
                 />
-                <Button type="submit" text="Save" width="50%" />
+                <Button
+                  type="submit"
+                  text={submitting ? "Saving..." : "Save"}
+                  width="50%"
+                  disabled={submitting}
+                />
               </div>
             </form>
           </FormWrapper>
         )}
+
+        {/* Edit entity */}
+        {showEdit && (
+          <FormWrapper>
+            <form
+              className="contentWrapper"
+              onSubmit={(e) => handleEdit(e, rowDetails.original)}
+            >
+              <h5>Edit {collectionType}</h5>
+
+              {/* Meal */}
+              {collectionType?.toLowerCase() === "meal" && (
+                <>
+                  <FormGroup
+                    fieldStyle="shortText"
+                    name="name"
+                    placeholder="Meal name"
+                    defaultValue={rowDetails?.values?.name}
+                  />
+                  <FormGroup
+                    fieldStyle="shortText"
+                    inputType="number"
+                    name="price"
+                    placeholder="Price"
+                    defaultValue={rowDetails?.values?.price}
+                  />
+                  <MultiSelect
+                    name="days"
+                    list={days}
+                    value={
+                      selectedDays || JSON.stringify(rowDetails.original.days)
+                    }
+                    setValue={setSelectedDays}
+                    placeholder="Days"
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="photoInput"
+                    onChange={(e) => loadFile(e)}
+                  />
+                  {!mealImgDetails && !Object.keys(rowDetails).length && (
+                    <div className="dropZone">
+                      <img
+                        src={uploadCloud}
+                        alt="upload"
+                        className="uploadIcon"
+                      />
+                      <p className="sup prompt">
+                        Drag &amp; drop or{" "}
+                        <span
+                          className="textUnderline browse"
+                          onClick={() =>
+                            document.querySelector("#photoInput").click()
+                          }
+                        >
+                          browse
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  {mealImgDetails && (
+                    <div className="attachment">
+                      <div className="imgWrapper">
+                        <img
+                          src={URL.createObjectURL(mealImgDetails)}
+                          alt="meal"
+                          id="photoOutput"
+                        />
+                      </div>
+                      <div className="imgDetails">
+                        <h5 className="text">{mealImgDetails.name}</h5>
+                        <Spacer y={1.2} />
+                        <p className="small">
+                          {getFileSize(mealImgDetails.size)}
+                        </p>
+                      </div>
+                      <div className="change">
+                        <span
+                          className="textUnderline prompt"
+                          onClick={() =>
+                            document.querySelector("#photoInput").click()
+                          }
+                        >
+                          Change
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {!mealImgDetails && (
+                    <div className="attachment">
+                      <div className="imgWrapper">
+                        <img
+                          src={`${API_HOST_MAIN}/uploads/${rowDetails.values.photo}`}
+                          alt="meal"
+                          id="photoOutput"
+                        />
+                      </div>
+                      <div className="imgDetails">
+                        <h5 className="text wrap">{rowDetails.values.name}</h5>
+                      </div>
+                      <div className="change">
+                        <span
+                          className="textUnderline prompt"
+                          onClick={() =>
+                            document.querySelector("#photoInput").click()
+                          }
+                        >
+                          Change
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Location */}
+              {collectionType?.toLowerCase() === "location" && (
+                <>
+                  <FormGroup
+                    fieldStyle="shortText"
+                    name="name"
+                    placeholder="Location name"
+                    defaultValue={rowDetails?.values?.name}
+                  />
+                  <FormGroup
+                    fieldStyle="shortText"
+                    inputType="number"
+                    name="delivery_price"
+                    placeholder="Price (NGN)"
+                    defaultValue={rowDetails?.values?.delivery_price}
+                  />
+                  <Dropdown
+                    name="active"
+                    list={[0, 1]}
+                    value={
+                      activeFieldVal || rowDetails?.values?.active.toString()
+                    }
+                    setValue={setActiveFieldVal}
+                    placeholder="Active"
+                  />
+                </>
+              )}
+
+              {/* Coupon */}
+              {collectionType?.toLowerCase() === "coupon" && (
+                <>
+                  {/* <FormGroup
+                    fieldStyle="shortText"
+                    name="name"
+                    placeholder="Coupon name"
+                  /> */}
+                  <FormGroup
+                    fieldStyle="shortText"
+                    name="code"
+                    placeholder="Coupon code"
+                    defaultValue={rowDetails.values.code}
+                  />
+                  <FormGroup
+                    fieldStyle="shortText"
+                    name="expires"
+                    placeholder="Expires (in days)"
+                    defaultValue={rowDetails.original.duration}
+                  />
+                  <Dropdown
+                    name="type"
+                    list={["delivery"]}
+                    value={couponType || rowDetails.values.type}
+                    setValue={setCouponType}
+                    placeholder="Coupon type"
+                  />
+                  <MultiSelect
+                    name="locations"
+                    list={
+                      extra?.locations.map((location) => location.name) || []
+                    }
+                    value={
+                      selectedLocations ||
+                      JSON.stringify(
+                        rowDetails.original.locations.map(
+                          (location) => location.name
+                        )
+                      )
+                    }
+                    setValue={setSelectedLocations}
+                    placeholder="Locations"
+                  />
+                </>
+              )}
+
+              <div className="row">
+                <Button
+                  type="button"
+                  text="Cancel"
+                  width="50%"
+                  className="plain textDark"
+                  onClick={handleCancelEdit}
+                />
+                <Button
+                  type="submit"
+                  text={submitting ? "Saving..." : "Save"}
+                  width="50%"
+                  disabled={submitting}
+                />
+              </div>
+            </form>
+          </FormWrapper>
+        )}
+
         {title && (
           <Header>
             <h1>{title}</h1>
-            {canAdd && (
+            {handleAdd && (
               <Button
                 text={`Add ${collectionType}`}
                 icon={plusIcon}
@@ -690,7 +926,7 @@ const DataTable = (props) => {
                 <tr
                   {...row.getRowProps()}
                   onClick={() => {
-                    setRowDetails(row);
+                    handleRowClick(row);
                   }}
                 >
                   <td className="checkbox">
@@ -718,96 +954,98 @@ const DataTable = (props) => {
             })}
           </tbody>
         </Inner>
-        <Pagination>
-          <div className="col">
-            <div className="col pageSize item">
-              <span className="sup">Items per page: </span>
-              <div className="col selectGroup">
-                <select
-                  id="pageSize"
-                  name="pageSize"
-                  onChange={(e) => setPageSize(Number(e.target.value))}
-                  defaultValue={pageSize}
-                >
-                  <option value="" hidden>
-                    {pageSize}
-                  </option>
-                  {rows.length >= 10 && <option value="10">10</option>}
-                  {rows.length >= 20 && <option value="20">20</option>}
-                  {rows.length >= 30 && <option value="30">30</option>}
-                  {rows.length >= 40 && <option value="40">40</option>}
-                  {rows.length >= 50 && <option value="50">50</option>}
-                </select>
-                <img
-                  src={chevronDown}
-                  alt="dropdown"
-                  className="dropdownIcon"
-                />
-              </div>
-            </div>
-            <div className="divider"></div>
-            <div className="col item">
-              <span className="sup">
-                {page[0].index + 1} – {page[pageSize - 1].index + 1} of{" "}
-                {rows.length} items
-              </span>
-            </div>
-            <div className="divider"></div>
-          </div>
-          <div className="col">
-            <div className="divider"></div>
-            <div className="col item">
-              <div className="col selectGroup">
-                <select
-                  id="pageSize"
-                  name="pageSize"
-                  onChange={(e) => {
-                    const pageNumber = e.target.value
-                      ? Number(e.target.value) - 1
-                      : 0;
-                    gotoPage(pageNumber);
-                  }}
-                  value={pageIndex + 1}
-                >
-                  <option value="" hidden>
-                    {pageIndex + 2}
-                  </option>
-                  {numSequence(pageCount).map((item) => (
-                    <option key={`page_${item}`} value={item}>
-                      {item}
+        {!!page.length && (
+          <Pagination>
+            <div className="col">
+              <div className="col pageSize item">
+                <span className="sup">Items per page: </span>
+                <div className="col selectGroup">
+                  <select
+                    id="pageSize"
+                    name="pageSize"
+                    onChange={(e) => setPageSize(Number(e.target.value))}
+                    defaultValue={pageSize}
+                  >
+                    <option value="" hidden>
+                      {pageSize}
                     </option>
-                  ))}
-                </select>
-                <img
-                  src={chevronDown}
-                  alt="dropdown"
-                  className="dropdownIcon"
-                />
+                    {rows.length >= 10 && <option value="10">10</option>}
+                    {rows.length >= 20 && <option value="20">20</option>}
+                    {rows.length >= 30 && <option value="30">30</option>}
+                    {rows.length >= 40 && <option value="40">40</option>}
+                    {rows.length >= 50 && <option value="50">50</option>}
+                  </select>
+                  <img
+                    src={chevronDown}
+                    alt="dropdown"
+                    className="dropdownIcon"
+                  />
+                </div>
               </div>
-              <div className="col">
+              <div className="divider"></div>
+              <div className="col item">
                 <span className="sup">
-                  &nbsp; of {pageCount} page{pageCount > 1 ? "s" : ""}
+                  {page[0].index + 1} – {page[page.length - 1].index + 1} of{" "}
+                  {rows.length} items
                 </span>
               </div>
+              <div className="divider"></div>
             </div>
-            <div className="divider"></div>
-            <button
-              className="col item nav"
-              disabled={!canPreviousPage}
-              onClick={() => previousPage()}
-            >
-              <img src={prevIcon} alt="previous" className="icon" />
-            </button>
-            <div className="divider"></div>
-            <button
-              className="col item nav"
-              disabled={!canNextPage}
-              onClick={() => nextPage()}
-            >
-              <img src={nextIcon} alt="next" className="icon" />
-            </button>
-          </div>
-        </Pagination>
+            <div className="col">
+              <div className="divider"></div>
+              <div className="col item">
+                <div className="col selectGroup">
+                  <select
+                    id="pageSize"
+                    name="pageSize"
+                    onChange={(e) => {
+                      const pageNumber = e.target.value
+                        ? Number(e.target.value) - 1
+                        : 0;
+                      gotoPage(pageNumber);
+                    }}
+                    value={pageIndex + 1}
+                  >
+                    <option value="" hidden>
+                      {pageIndex + 2}
+                    </option>
+                    {numSequence(pageCount).map((item) => (
+                      <option key={`page_${item}`} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                  <img
+                    src={chevronDown}
+                    alt="dropdown"
+                    className="dropdownIcon"
+                  />
+                </div>
+                <div className="col">
+                  <span className="sup">
+                    &nbsp; of {pageCount} page{pageCount !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              </div>
+              <div className="divider"></div>
+              <button
+                className="col item nav"
+                disabled={!canPreviousPage}
+                onClick={() => previousPage()}
+              >
+                <img src={prevIcon} alt="previous" className="icon" />
+              </button>
+              <div className="divider"></div>
+              <button
+                className="col item nav"
+                disabled={!canNextPage}
+                onClick={() => nextPage()}
+              >
+                <img src={nextIcon} alt="next" className="icon" />
+              </button>
+            </div>
+          </Pagination>
+        )}
       </Wrapper>
     </>
   );

@@ -140,7 +140,7 @@ const Navbar = ({ searchVal, setSearchVal }) => {
         </div>
         <img src={chevronDown} alt="chevron down" className="downIcon" />
         <div id="adminMenu" className="menu">
-          <button className="item sup">Profile</button>
+          {/* <button className="item sup">Profile</button> */}
           <button className="item sup">Log out</button>
         </div>
       </Admin>

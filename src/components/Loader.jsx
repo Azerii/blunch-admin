@@ -1,5 +1,5 @@
 import styled, { keyframes } from "styled-components";
-import logo from "../assets/logo.svg";
+// import logo from "../assets/logo.svg";
 
 const bounce = keyframes`
   from {
@@ -42,12 +42,12 @@ const load = keyframes`
 `;
 
 const Wrapper = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 20;
-  height: 100vh;
-  width: 100vw;
+  // position: absolute;
+  // top: 0;
+  // left: 0;
+  // z-index: 20;
+  min-height: 50vh;
+  width: 100%;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -55,36 +55,23 @@ const Wrapper = styled.div`
   justify-content: center;
   transition: all 0.5s ease-out;
 
-  .text {
-    position: relative;
-    color: var(--sup_text);
-    font-size: 24px;
-    font-weight: 500;
-    line-height: 32px;
-    margin-top: 1.2rem;
-  }
-
   .progress {
-    display: block;
-    width: 100%;
-    background-color: var(--background);
-    position: absolute;
-    top: calc(100% + 1.2rem);
-    left: 0;
+    position: relative;
+    width: 32rem;
     height: 3px;
     border-radius: 3px;
     overflow: hidden;
+  }
 
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 0;
-      height: 100%;
-      background-color: var(--primary);
-      animation: ${load} 1.5s ease-in-out forwards;
-    }
+  .bar {
+    display: block;
+    width: 100%;
+    background-color: var(--background);
+    height: 100%;
+    width: 0;
+    height: 100%;
+    background-color: var(--primary);
+    animation: ${load} 1.5s ease-in-out forwards;
   }
 
   .logo {
@@ -96,10 +83,10 @@ const Wrapper = styled.div`
 export default function Loader() {
   return (
     <Wrapper>
-      <img src={logo} alt="Blunch.ng" className="logo" />
-      <p className="text">
-        Blunch.ng<span className="progress"></span>
-      </p>
+      {/* <img src={logo} alt="Blunch.ng" className="logo" /> */}
+      <div className="progress">
+        <span className="bar"></span>
+      </div>
     </Wrapper>
   );
 }

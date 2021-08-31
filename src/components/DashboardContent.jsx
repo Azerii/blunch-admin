@@ -2,6 +2,7 @@ import DataTable from "components/DataTable";
 import styled from "styled-components";
 import { useTable, useGlobalFilter, usePagination } from "react-table";
 import Navbar from "components/Navbar";
+import Loader from "./Loader";
 
 const Wrapper = styled.div`
   padding: 4.8rem;
@@ -13,7 +14,11 @@ const DashboardContent = ({
   columns = [],
   title,
   collectionType,
-  canAdd,
+  handleAdd,
+  handleEdit,
+  submitting,
+  loading,
+  extra,
 }) => {
   const {
     getTableProps,
@@ -46,7 +51,9 @@ const DashboardContent = ({
   const tableProps = {
     title,
     collectionType,
-    canAdd,
+    handleAdd,
+    handleEdit,
+    submitting,
     getTableProps,
     getTableBodyProps,
     headerGroups,
@@ -65,6 +72,7 @@ const DashboardContent = ({
     setPageSize,
     setGlobalFilter,
     globalFilter,
+    extra,
   };
 
   return (
@@ -72,7 +80,7 @@ const DashboardContent = ({
       <Navbar searchVal={globalFilter} setSearchVal={setGlobalFilter} />
       <Wrapper>
         {children}
-        <DataTable {...tableProps} />
+        {loading ? <Loader /> : <DataTable {...tableProps} />}
       </Wrapper>
     </>
   );

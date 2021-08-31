@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import DashboardContent from "components/DashboardContent";
 import Spacer from "components/Spacer";
+import MOCK_DATA from "utils/MOCK_DATA";
 
 const Wrapper = styled.div`
   display: grid;
@@ -69,7 +70,7 @@ const COLUMNS = [
 
 const Home = () => {
   return (
-    <DashboardContent columns={COLUMNS} title="order">
+    <DashboardContent columns={COLUMNS} data={MOCK_DATA} collectionType="order">
       <Wrapper>
         {/* Orders due today */}
         <OverviewCard>

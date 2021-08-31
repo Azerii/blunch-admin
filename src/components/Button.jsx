@@ -14,10 +14,10 @@ const Wrapper = styled.button`
   background-color: ${(props) =>
     props.disabled ? "var(--grey_1)" : "var(--primary)"};
   color: var(--white);
-  font-size: 16px;
+  font-size: 14px;
   font-style: normal;
-  font-weight: 700;
-  line-height: 24px;
+  font-weight: 400;
+  line-height: 18px;
   letter-spacing: 0.75px;
   text-align: center;
   transition: background 250ms ease-in;

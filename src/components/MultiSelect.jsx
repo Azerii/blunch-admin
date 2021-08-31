@@ -1,28 +1,46 @@
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import chevron_down from "assets/chevron_down.svg";
+import removeIcon from "assets/closeWhite.svg";
 
 const DropdownWrapper = styled.div`
   width: 100%;
   position: relative;
 
   .selectInput {
-    display: block;
-    color: var(--text);
-    width: 80%;
-    background-color: transparent;
-    border: none;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 18px;
-    letter-spacing: 0px;
-    color: var(--sup_text);
-    pointer-events: none;
+    display: none;
+  }
 
-    &::placeholder {
-      color: ${(props) =>
-        props.disabled ? "var(--border_color)" : "var(--sup_text)"};
+  .selectedWrapper {
+    width: 40rem;
+    overflow-x: auto;
+    display: flex;
+    grid-gap: 0.4rem;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .selected {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    background-color: var(--sup_text);
+    color: var(--white);
+    border-radius: 1rem;
+    padding: 0.2rem 0.8rem;
+    width: max-content;
+    font-size: 1rem;
+    text-transform: capitalize;
+
+    .icon {
+      height: 1.2rem;
+      margin-left: 1.2rem;
     }
   }
 
@@ -123,7 +141,7 @@ const DropdownWrapper = styled.div`
   }
 `;
 
-const Dropdown = ({
+const MultiSelect = ({
   className,
   name,
   inputType,
@@ -145,8 +163,18 @@ const Dropdown = ({
   const handleSelect = (e, l) => {
     e.preventDefault();
     e.stopPropagation();
-    setValue(l);
+    const temp = JSON.parse(value);
+    temp.push(l);
+    setValue(JSON.stringify(temp));
     toggleList(false);
+  };
+
+  const handleRemove = (e, index) => {
+    e.stopPropagation();
+
+    const temp = JSON.parse(value);
+    temp.splice(index, 1);
+    setValue(JSON.stringify(temp));
   };
 
   return (
@@ -157,40 +185,51 @@ const Dropdown = ({
           document.querySelector(`#${name}`).classList.toggle("isOpen")
         }
       >
-        {!!value.toString().length && (
-          <label htmlFor={name}>{placeholder}</label>
-        )}
+        {!!value?.length && <label htmlFor={name}>{placeholder}</label>}
         <input
           type={inputType || "text"}
           name={name}
           value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-          }}
           className="selectInput"
           placeholder={placeholder}
           // defaultValue={defaultValue}
-          readOnly={readOnly}
+          readOnly
         />
+        <div className="selectedWrapper">
+          {!!value?.length &&
+            JSON.parse(value).map((item, index) => (
+              <div key={item} className="selected">
+                <span className="small">{item}</span>
+                <img
+                  src={removeIcon}
+                  alt="remove"
+                  className="icon"
+                  onClick={(e) => handleRemove(e, index)}
+                />
+              </div>
+            ))}
+        </div>
         <img src={chevron_down} alt="down" className="toggleIcon" />
       </div>
       <div className="list">
         {!!list?.length &&
-          list.map((item) => (
-            <button
-              key={item}
-              className="listItem sup"
-              onClick={(e) => handleSelect(e, item.toString())}
-            >
-              {item}
-            </button>
-          ))}
+          list
+            .filter((item) => !value?.includes(item))
+            .map((item) => (
+              <button
+                key={item}
+                className="listItem sup"
+                onClick={(e) => handleSelect(e, item.toString())}
+              >
+                {item}
+              </button>
+            ))}
       </div>
     </DropdownWrapper>
   );
 };
 
-Dropdown.propTypes = {
+MultiSelect.propTypes = {
   className: PropTypes.string,
   name: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
@@ -204,4 +243,4 @@ Dropdown.propTypes = {
   readOnly: PropTypes.bool,
 };
 
-export default Dropdown;
+export default MultiSelect;
