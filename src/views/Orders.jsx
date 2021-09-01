@@ -56,7 +56,7 @@ const Orders = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (res.data.orders) {
+      if (res?.data?.orders) {
         const temp = res.data.orders.map((order) => ({
           ...order,
           date: new Date(order.created_at).toLocaleDateString(),
@@ -77,6 +77,7 @@ const Orders = () => {
     getOrders();
     // eslint-disable-next-line
   }, []);
+
   return (
     <DashboardContent
       columns={COLUMNS}

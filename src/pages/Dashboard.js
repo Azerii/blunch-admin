@@ -1,5 +1,5 @@
 import Sidebar from "components/Sidebar";
-import { Route, Switch } from "react-router";
+import { Redirect, Route, Switch } from "react-router";
 import styled from "styled-components";
 import Coupons from "views/Coupons";
 import Home from "views/Home";
@@ -19,6 +19,9 @@ const Wrapper = styled.div`
 `;
 
 const Dashboard = () => {
+  if (!sessionStorage.getItem("act")) {
+    return <Redirect to="/login" />;
+  }
   return (
     <Wrapper>
       <Sidebar />

@@ -4,6 +4,7 @@ import searchIcon from "assets/searchIcon.svg";
 import userIcon from "assets/userIcon.svg";
 import chevronDown from "assets/chevronDown.svg";
 import Backdrop from "./Backdrop";
+import { useHistory } from "react-router";
 
 const Wrapper = styled.nav`
   width: 100%;
@@ -106,6 +107,8 @@ const Admin = styled.div`
 `;
 
 const Navbar = ({ searchVal = "", setSearchVal }) => {
+  const router = useHistory();
+
   const showMenu = () => {
     document.querySelector("#backdrop").classList.add("show");
     document.querySelector("#adminMenu").classList.add("show");
@@ -114,6 +117,11 @@ const Navbar = ({ searchVal = "", setSearchVal }) => {
   const hideMenu = () => {
     document.querySelector("#backdrop").classList.remove("show");
     document.querySelector("#adminMenu").classList.remove("show");
+  };
+
+  const logout = () => {
+    sessionStorage.clear();
+    router.push("/login");
   };
   return (
     <Wrapper>
@@ -141,7 +149,9 @@ const Navbar = ({ searchVal = "", setSearchVal }) => {
         <img src={chevronDown} alt="chevron down" className="downIcon" />
         <div id="adminMenu" className="menu">
           {/* <button className="item sup">Profile</button> */}
-          <button className="item sup">Log out</button>
+          <button className="item sup" onClick={logout}>
+            Log out
+          </button>
         </div>
       </Admin>
     </Wrapper>

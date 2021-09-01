@@ -132,12 +132,15 @@ const Coupons = () => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = formDataToJSON(formData);
+    const locationIds = JSON.parse(data.locations).map(
+      (location) => locations.find((item) => item.name === location).id
+    );
 
     try {
       setSubmitting(true);
       const res = await axios.patch(
-        `${API_HOST}/coupon/${record.id}?type=${data.type}&discount=${data.discount}&expires=${data.duration}&code=${data.code}`,
-        { locations: JSON.parse(data.locations) },
+        `${API_HOST}/coupon/${record.id}?type=${data.type}&discount=${data.discount}&expires=${data.expires}&code=${data.code}`,
+        { locations: locationIds },
         {
           headers: { Authorization: `Bearer ${token}` },
         }

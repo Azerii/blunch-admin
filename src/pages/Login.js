@@ -4,6 +4,12 @@ import Logo from "components/Logo";
 import Spacer from "components/Spacer";
 import FormGroup from "components/FormGroup";
 import Button from "components/Button";
+import { useState } from "react";
+import axios from "axios";
+import { API_HOST } from "utils/config";
+import { useHistory } from "react-router";
+import formDataToJSON from "utils/formDataToJSON";
+import AlertBox from "components/AlertBox";
 
 const Wrapper = styled.div`
   .formWrapper {
@@ -38,8 +44,50 @@ const Header = styled(Container)`
 `;
 
 const Login = () => {
+  const router = useHistory();
+  const [loading, setLoading] = useState(false);
+  const [alertType, setAlertType] = useState("");
+  const [alertText, setAlertText] = useState("");
+
+  const showAlert = (msg = "...", type) => {
+    // e.preventDefault();
+    setAlertType(type);
+    setAlertText(msg);
+
+    document.querySelector(".alertBox").classList.add("show");
+    setTimeout(
+      () => document.querySelector(".alertBox").classList.remove("show"),
+      3000
+    );
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = formDataToJSON(formData);
+
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        `${API_HOST}?email=${data.email}&password=${data.password}`
+      );
+      setLoading(false);
+      if (res?.data[0]?.success) {
+        sessionStorage.setItem("act", res.data[0].token);
+        router.push("/dashboard");
+      } else {
+        showAlert(`${res.data.failure ?? "An error occurred"}`, "danger");
+      }
+    } catch (e) {
+      setLoading(false);
+      showAlert(e.message, "danger");
+      console.log(e.message);
+    }
+  };
+
   return (
     <Wrapper>
+      <AlertBox className="alertBox" type={alertType} text={alertText} />
       <Header>
         <Logo />
       </Header>
@@ -48,7 +96,7 @@ const Login = () => {
         <Spacer y={1.2} />
         <p className="sup">Enter your email address and password to sign in.</p>
         <Spacer y={4.8} />
-        <form>
+        <form onSubmit={handleSubmit}>
           <FormGroup
             fieldStyle="shortText"
             name="email"
@@ -60,7 +108,12 @@ const Login = () => {
             placeholder="Password"
             className="password"
           />
-          <Button text="Login" className="submitBtn" fullWidth disabled />
+          <Button
+            text={loading ? "Logging in" : "Login"}
+            className="submitBtn"
+            fullWidth
+            disabled={loading}
+          />
         </form>
       </div>
     </Wrapper>

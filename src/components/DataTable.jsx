@@ -868,6 +868,7 @@ const DataTable = (props) => {
                   />
                   <FormGroup
                     fieldStyle="shortText"
+                    inputType="number"
                     name="expires"
                     placeholder="Expires (in days)"
                     defaultValue={rowDetails.original.duration}
@@ -951,10 +952,12 @@ const DataTable = (props) => {
                   <img src={downloadIcon} alt="Arrow down" className="icon" />
                 </button>
               )}
-              <button className="item" onClick={() => setConfirmDelete(true)}>
-                <span>Delete</span>
-                <img src={deleteIcon} alt="Bin" className="icon" />
-              </button>
+              {collectionType !== "order" && (
+                <button className="item" onClick={() => setConfirmDelete(true)}>
+                  <span>Delete</span>
+                  <img src={deleteIcon} alt="Bin" className="icon" />
+                </button>
+              )}
               <button
                 className="item"
                 onClick={() => setSelectedContentIds([])}
