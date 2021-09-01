@@ -163,7 +163,7 @@ const MultiSelect = ({
   const handleSelect = (e, l) => {
     e.preventDefault();
     e.stopPropagation();
-    const temp = JSON.parse(value);
+    const temp = value.length ? JSON.parse(value) : [];
     temp.push(l);
     setValue(JSON.stringify(temp));
     toggleList(false);
@@ -186,13 +186,12 @@ const MultiSelect = ({
         }
       >
         {!!value?.length && <label htmlFor={name}>{placeholder}</label>}
+        {!value?.length && <p className="sup">{placeholder}</p>}
         <input
           type={inputType || "text"}
           name={name}
           value={value}
           className="selectInput"
-          placeholder={placeholder}
-          // defaultValue={defaultValue}
           readOnly
         />
         <div className="selectedWrapper">

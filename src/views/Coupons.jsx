@@ -1,4 +1,5 @@
 import axios from "axios";
+import AlertBox from "components/AlertBox";
 import DashboardContent from "components/DashboardContent";
 import { useEffect, useState } from "react";
 import { API_HOST, API_HOST_MAIN, token } from "utils/config";
@@ -49,6 +50,20 @@ const Coupons = () => {
   const [submitting, setSubmitting] = useState(false);
   const [coupons, setCoupons] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [alertType, setAlertType] = useState("");
+  const [alertText, setAlertText] = useState("");
+
+  const showAlert = (msg = "...", type) => {
+    // e.preventDefault();
+    setAlertType(type);
+    setAlertText(msg);
+
+    document.querySelector(".alertBox").classList.add("show");
+    setTimeout(
+      () => document.querySelector(".alertBox").classList.remove("show"),
+      3000
+    );
+  };
 
   const getCoupons = async () => {
     try {
@@ -76,37 +91,44 @@ const Coupons = () => {
       setLoading(false);
     } catch (e) {
       setLoading(false);
+      showAlert(e.message, "danger");
       console.log(e.message);
     }
   };
 
-  const addCoupon = async (e) => {
+  const addCoupon = async (e, setShowAdd) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = formDataToJSON(formData);
+    const locationIds = JSON.parse(data.locations).map(
+      (location) => locations.find((item) => item.name === location).id
+    );
 
     try {
       setSubmitting(true);
       const res = await axios.post(
-        `${API_HOST}/coupons?name=${data.name}&delivery_price=${data.delivery_price}&active=${data.active}`,
-        {},
+        `${API_HOST}/coupon?type=${data.type}&discount=${data.discount}&expires=${data.expires}&code=${data.code}`,
+        { locations: locationIds },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       setSubmitting(false);
       if (res.data.status === "success") {
-        alert(res.data.message);
-        console.log(res.data.message);
+        showAlert(res.data.message, "success");
+        setShowAdd(false);
+        getCoupons();
+      } else {
+        showAlert("Something went wrong", "danger");
       }
     } catch (e) {
       setSubmitting(false);
-      alert("An error occurred");
+      showAlert(e.message, "danger");
       console.log(e.message);
     }
   };
 
-  const editCoupon = async (e, record) => {
+  const editCoupon = async (e, record, setShowEdit) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = formDataToJSON(formData);
@@ -114,7 +136,7 @@ const Coupons = () => {
     try {
       setSubmitting(true);
       const res = await axios.patch(
-        `${API_HOST}/coupons/${record.id}?type=${data.type}&discount=${data.discount}&expires=${data.duration}&code=${data.code}`,
+        `${API_HOST}/coupon/${record.id}?type=${data.type}&discount=${data.discount}&expires=${data.duration}&code=${data.code}`,
         { locations: JSON.parse(data.locations) },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -122,11 +144,38 @@ const Coupons = () => {
       );
       setSubmitting(false);
       if (res.data.status === "success") {
-        console.log(res.data.message);
+        showAlert(res.data.message, "success");
+        setShowEdit(false);
+        getCoupons();
+      } else {
+        showAlert("Something went wrong", "danger");
       }
     } catch (e) {
       setSubmitting(false);
-      alert("An error occurred");
+      showAlert(e.message, "danger");
+      console.log(e.message);
+    }
+  };
+
+  const deleteCoupons = async (ids, setConfirmDelete) => {
+    const couponIds = ids.map((id) => coupons[id].id);
+    try {
+      setSubmitting(true);
+      const res = await axios.delete(`${API_HOST}/coupons`, {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { coupons: couponIds },
+      });
+      setSubmitting(false);
+      if (res.data.status === "success") {
+        showAlert(res.data.message, "success");
+        setConfirmDelete(false);
+        getCoupons();
+      } else {
+        showAlert("Something went wrong", "danger");
+      }
+    } catch (e) {
+      setSubmitting(false);
+      showAlert(e.message, "danger");
       console.log(e.message);
     }
   };
@@ -145,9 +194,12 @@ const Coupons = () => {
       loading={loading}
       handleAdd={addCoupon}
       handleEdit={editCoupon}
+      handleDelete={deleteCoupons}
       submitting={submitting}
       extra={{ locations }}
-    />
+    >
+      <AlertBox className="alertBox" type={alertType} text={alertText} />
+    </DashboardContent>
   );
 };
 

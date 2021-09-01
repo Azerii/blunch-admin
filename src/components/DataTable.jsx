@@ -201,6 +201,12 @@ const RowDetails = styled(Backdrop)`
     grid-gap: 1.2rem;
     margin-bottom: 2.4rem;
     overflow-wrap: anywhere;
+
+    &.ordersPerDay {
+      grid-template-columns: 1fr 5fr;
+      grid-gap: unset;
+      margin-bottom: 0.8rem;
+    }
   }
 
   .exportBtn {
@@ -325,6 +331,15 @@ const days = [
   "saturday",
 ];
 
+const days_id = {
+  1: "Mon",
+  2: "Tue",
+  3: "Wed",
+  4: "Thur",
+  5: "Fri",
+  6: "Sat",
+};
+
 const numSequence = (max) => {
   let arr = [];
 
@@ -352,6 +367,7 @@ const DataTable = (props) => {
     collectionType,
     handleAdd,
     handleEdit,
+    handleDelete,
     submitting,
     getTableProps,
     getTableBodyProps,
@@ -444,6 +460,8 @@ const DataTable = (props) => {
   const handleCancelEdit = () => {
     setShowEdit(false);
     setMealImgDetails(false);
+    setSelectedDays("");
+    setSelectedLocations("");
     setRowDetails({});
   };
 
@@ -460,7 +478,15 @@ const DataTable = (props) => {
                   width="50%"
                   onClick={() => setConfirmDelete(false)}
                 />
-                <Button text="Delete" width="50%" className="plain textDark" />
+                <Button
+                  text={submitting ? "Deleting..." : "Delete"}
+                  width="50%"
+                  className="plain textDark"
+                  onClick={() =>
+                    handleDelete(selectedContentIds, setConfirmDelete)
+                  }
+                  disabled={submitting}
+                />
               </div>
             </div>
           </DeleteModal>
@@ -484,9 +510,37 @@ const DataTable = (props) => {
                       {rowDetails.cells[index].column.Header === "Amount" &&
                         " Paid"}
                     </span>
-                    <span className="sup">{rowDetails.values[item]}</span>
+                    <span className="sup">
+                      {rowDetails.cells[index].column.Header === "Amount" &&
+                        "NGN "}
+                      {rowDetails.values[item]}
+                    </span>
                   </div>
                 ))}
+                {collectionType === "order" && (
+                  <div className="rowItem">
+                    <span className="sup">Orders</span>
+                    <div>
+                      {rowDetails.original.items.map((item, index) => (
+                        <div
+                          key={`${item.name}_${index}`}
+                          className="rowItem ordersPerDay"
+                        >
+                          <div>
+                            <span className="sup">
+                              {days_id[item.pivot.day_id]}:
+                            </span>
+                          </div>
+                          <div>
+                            <span className="sup">
+                              {item.pivot.quantity} {item.name}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="row justify-end">
                   <Button
                     className="exportBtn"
@@ -502,7 +556,10 @@ const DataTable = (props) => {
         {/* Create record */}
         {showAdd && (
           <FormWrapper>
-            <form className="contentWrapper" onSubmit={handleAdd}>
+            <form
+              className="contentWrapper"
+              onSubmit={(e) => handleAdd(e, setShowAdd)}
+            >
               <h5>Add new {collectionType}</h5>
 
               {/* Meal */}
@@ -605,11 +662,6 @@ const DataTable = (props) => {
                 <>
                   <FormGroup
                     fieldStyle="shortText"
-                    name="name"
-                    placeholder="Coupon name"
-                  />
-                  <FormGroup
-                    fieldStyle="shortText"
                     name="code"
                     placeholder="Coupon code"
                   />
@@ -617,6 +669,12 @@ const DataTable = (props) => {
                     fieldStyle="shortText"
                     name="expires"
                     placeholder="Expires (in days)"
+                  />
+                  <FormGroup
+                    fieldStyle="shortText"
+                    inputType="number"
+                    name="discount"
+                    placeholder="Discount"
                   />
                   <Dropdown
                     name="type"
@@ -627,10 +685,12 @@ const DataTable = (props) => {
                   />
                   <MultiSelect
                     name="locations"
-                    list={extra?.locations || []}
+                    list={
+                      extra?.locations.map((location) => location.name) || []
+                    }
                     value={selectedLocations}
                     setValue={setSelectedLocations}
-                    placeholder="Days"
+                    placeholder="Locations"
                   />
                 </>
               )}
@@ -659,7 +719,7 @@ const DataTable = (props) => {
           <FormWrapper>
             <form
               className="contentWrapper"
-              onSubmit={(e) => handleEdit(e, rowDetails.original)}
+              onSubmit={(e) => handleEdit(e, rowDetails.original, setShowEdit)}
             >
               <h5>Edit {collectionType}</h5>
 
@@ -800,11 +860,6 @@ const DataTable = (props) => {
               {/* Coupon */}
               {collectionType?.toLowerCase() === "coupon" && (
                 <>
-                  {/* <FormGroup
-                    fieldStyle="shortText"
-                    name="name"
-                    placeholder="Coupon name"
-                  /> */}
                   <FormGroup
                     fieldStyle="shortText"
                     name="code"
@@ -816,6 +871,13 @@ const DataTable = (props) => {
                     name="expires"
                     placeholder="Expires (in days)"
                     defaultValue={rowDetails.original.duration}
+                  />
+                  <FormGroup
+                    fieldStyle="shortText"
+                    inputType="number"
+                    name="discount"
+                    placeholder="Discount"
+                    defaultValue={rowDetails.original.discount}
                   />
                   <Dropdown
                     name="type"
@@ -883,10 +945,12 @@ const DataTable = (props) => {
               </span>
             </div>
             <div className="col">
-              <button className="item">
-                <span>Export</span>
-                <img src={downloadIcon} alt="Arrow down" className="icon" />
-              </button>
+              {collectionType === "order" && (
+                <button className="item">
+                  <span>Export</span>
+                  <img src={downloadIcon} alt="Arrow down" className="icon" />
+                </button>
+              )}
               <button className="item" onClick={() => setConfirmDelete(true)}>
                 <span>Delete</span>
                 <img src={deleteIcon} alt="Bin" className="icon" />

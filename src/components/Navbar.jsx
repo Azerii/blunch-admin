@@ -105,7 +105,7 @@ const Admin = styled.div`
   }
 `;
 
-const Navbar = ({ searchVal, setSearchVal }) => {
+const Navbar = ({ searchVal = "", setSearchVal }) => {
   const showMenu = () => {
     document.querySelector("#backdrop").classList.add("show");
     document.querySelector("#adminMenu").classList.add("show");

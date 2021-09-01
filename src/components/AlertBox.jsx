@@ -6,12 +6,12 @@ const Box = styled.div`
   align-items: center;
   padding: 0 2.4rem;
   min-width: 34.2rem;
-  height: 6.5rem;
+  height: 5.6rem;
   border-radius: 1.2rem;
   box-shadow: 0px 16px 40px 0px #9aaaac33;
-  background-color: #ffffff;
+  background-color: var(--white);
   position: fixed;
-  top: -7rem;
+  top: -6rem;
   left: 50%;
   transform: translateX(-50%);
   opacity: 0;
@@ -25,15 +25,15 @@ const Box = styled.div`
   }
 
   &.success {
-    border-left: 8px solid #00ba88;
+    border-left: 8px solid var(--success);
   }
 
-  &.failure {
-    border-left: 8px solid #e12853;
+  &.danger {
+    border-left: 8px solid var(--danger);
   }
 
   .text {
-    color: #000000;
+    color: va(--text);
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
@@ -43,9 +43,9 @@ const Box = styled.div`
   }
 `;
 
-const AlertBox = ({ className, text }) => {
+const AlertBox = ({ className, text, type }) => {
   return (
-    <Box className={className}>
+    <Box className={`${className}${type ? ` ${type}` : ""}`}>
       <span className="text">{text}</span>
     </Box>
   );
@@ -54,6 +54,7 @@ const AlertBox = ({ className, text }) => {
 AlertBox.propTypes = {
   className: PropTypes.string.isRequired,
   text: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
 };
 
 export default AlertBox;
