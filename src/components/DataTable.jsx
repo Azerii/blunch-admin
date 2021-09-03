@@ -322,6 +322,20 @@ const FormWrapper = styled(Backdrop)`
   }
 `;
 
+const Dot = styled.div`
+  height: 1rem;
+  width: 1rem;
+  border-radius: 50%;
+
+  &.success {
+    background-color: var(--success);
+  }
+
+  &.danger {
+    background-color: var(--danger);
+  }
+`;
+
 const days = [
   "monday",
   "tuesday",
@@ -1011,6 +1025,12 @@ const DataTable = (props) => {
                           alt={row.values.name}
                           className="img"
                         />
+                      ) : cell.column.Header === "Active" ? (
+                        <Dot
+                          className={`${
+                            row.values.active === 1 ? "success" : "danger"
+                          }`}
+                        ></Dot>
                       ) : (
                         cell.render("Cell")
                       )}

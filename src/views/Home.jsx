@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import DashboardContent from "components/DashboardContent";
 import Spacer from "components/Spacer";
-import MOCK_DATA from "utils/MOCK_DATA";
 import { useEffect, useState } from "react";
 import AlertBox from "components/AlertBox";
 import axios from "axios";

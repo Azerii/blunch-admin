@@ -107,7 +107,7 @@ const Coupons = () => {
     try {
       setSubmitting(true);
       const res = await axios.post(
-        `${API_HOST}/coupon?type=${data.type}&discount=${data.discount}&expires=${data.expires}&code=${data.code}`,
+        `${API_HOST}/coupons?type=${data.type}&discount=${data.discount}&expires=${data.expires}&code=${data.code}`,
         { locations: locationIds },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -139,7 +139,7 @@ const Coupons = () => {
     try {
       setSubmitting(true);
       const res = await axios.patch(
-        `${API_HOST}/coupon/${record.id}?type=${data.type}&discount=${data.discount}&expires=${data.expires}&code=${data.code}`,
+        `${API_HOST}/coupons/${record.id}?type=${data.type}&discount=${data.discount}&expires=${data.expires}&code=${data.code}`,
         { locations: locationIds },
         {
           headers: { Authorization: `Bearer ${token}` },
