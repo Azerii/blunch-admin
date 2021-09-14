@@ -107,15 +107,19 @@ const Meals = () => {
     const data = formDataToJSON(formData);
     const dayIds = JSON.parse(data.days).map((day) => days[day.toLowerCase()]);
 
+    dayIds.forEach((id) => {
+      formData.append("days[]", id);
+    });
+
+    if (document.querySelector("#photoInput").files[0]) {
+      formData.append("photo", document.querySelector("#photoInput").files[0]);
+    }
+
     try {
       setSubmitting(true);
-      const res = await axios.post(
-        `${API_HOST}/meals?name=${data.name}&price=${data.price}`,
-        { days: dayIds },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await axios.post(`${API_HOST}/meals`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setSubmitting(false);
       if (res.data.status === "success") {
         showAlert(res.data.message, "success");
@@ -134,17 +138,23 @@ const Meals = () => {
   const editMeal = async (e, record, setShowEdit) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    // const data = formDataToJSON(formData);
+    const data = formDataToJSON(formData);
+
+    const dayIds = JSON.parse(data.days).map((day) => days[day.toLowerCase()]);
+
+    dayIds.forEach((id) => {
+      formData.append("days[]", id);
+    });
+
+    if (document.querySelector("#photoInput").files[0]) {
+      formData.append("photo", document.querySelector("#photoInput").files[0]);
+    }
 
     try {
       setSubmitting(true);
-      const res = await axios.patch(
-        `${API_HOST}/meals/${record.id}`,
-        formData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await axios.post(`${API_HOST}/meals/${record.id}`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setSubmitting(false);
       if (res.data.status === "success") {
         showAlert(res.data.message, "success");

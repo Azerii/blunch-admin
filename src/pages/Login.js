@@ -100,11 +100,13 @@ const Login = () => {
           <FormGroup
             fieldStyle="shortText"
             name="email"
+            inputType="email"
             placeholder="Email address"
           />
           <FormGroup
             fieldStyle="shortText"
             name="password"
+            inputType="password"
             placeholder="Password"
             className="password"
           />

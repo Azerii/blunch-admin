@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import Navbar from "../components/Navbar";
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -18,7 +17,6 @@ const Wrapper = styled.div`
 export default function PageNotFound() {
   return (
     <Wrapper>
-      <Navbar />
       <p className="prompt">404 | Page not found.</p>
     </Wrapper>
   );

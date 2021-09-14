@@ -2,7 +2,7 @@ import axios from "axios";
 import AlertBox from "components/AlertBox";
 import DashboardContent from "components/DashboardContent";
 import { useEffect, useState } from "react";
-import { API_HOST, API_HOST_MAIN, token } from "utils/config";
+import { API_HOST, token } from "utils/config";
 import formDataToJSON from "utils/formDataToJSON";
 
 const COLUMNS = [
@@ -42,10 +42,12 @@ const Locations = () => {
   const getLocations = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_HOST_MAIN}/locations`);
+      const res = await axios.get(`${API_HOST}/locations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      if (res.data.locations) {
-        setLocations(res.data.locations);
+      if (res.data?.length) {
+        setLocations(res.data);
       }
       setLoading(false);
     } catch (e) {
