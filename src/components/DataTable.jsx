@@ -47,6 +47,20 @@ const Inner = styled.table`
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+
+    .imgWrapper {
+      width: 4.8rem;
+      height: 4.8rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      border-radius: 0.4rem;
+
+      img {
+        height: 100%;
+      }
+    }
   }
 
   tr {
@@ -820,7 +834,7 @@ const DataTable = (props) => {
                     <div className="attachment">
                       <div className="imgWrapper">
                         <img
-                          src={`${API_HOST_MAIN}/uploads/${rowDetails.values.photo}`}
+                          src={`${API_HOST_MAIN}/photo/${rowDetails.values.photo}`}
                           alt="meal"
                           id="photoOutput"
                         />
@@ -1020,11 +1034,13 @@ const DataTable = (props) => {
                   {row.cells.map((cell) => (
                     <td {...cell.getCellProps()}>
                       {cell.column.Header === "Image" ? (
-                        <img
-                          src={cell.value}
-                          alt={row.values.name}
-                          className="img"
-                        />
+                        <div className="imgWrapper">
+                          <img
+                            src={`${API_HOST_MAIN}/photo/${cell.value}`}
+                            alt="item"
+                            className="img"
+                          />
+                        </div>
                       ) : cell.column.Header === "Active" ? (
                         <Dot
                           className={`${
