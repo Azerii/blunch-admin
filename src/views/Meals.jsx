@@ -77,7 +77,7 @@ const Meals = () => {
     try {
       setLoading(true);
       const res_meals = await axios.get(`${API_HOST}/meals`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token()}` },
       });
       const res_menu = await axios.get(`${API_HOST_MAIN}/menu`);
 
@@ -118,7 +118,7 @@ const Meals = () => {
     try {
       setSubmitting(true);
       const res = await axios.post(`${API_HOST}/meals`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token()}` },
       });
       setSubmitting(false);
       if (res.data.status === "success") {
@@ -153,7 +153,7 @@ const Meals = () => {
     try {
       setSubmitting(true);
       const res = await axios.post(`${API_HOST}/meals/${record.id}`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token()}` },
       });
       setSubmitting(false);
       if (res.data.status === "success") {
@@ -175,7 +175,7 @@ const Meals = () => {
     try {
       setSubmitting(true);
       const res = await axios.delete(`${API_HOST}/meals`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token()}` },
         data: { meals: mealIds },
       });
       setSubmitting(false);

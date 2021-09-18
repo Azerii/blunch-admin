@@ -69,7 +69,7 @@ const Coupons = () => {
     try {
       setLoading(true);
       const res_coupons = await axios.get(`${API_HOST}/coupons`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token()}` },
       });
       const res_locations = await axios.get(`${API_HOST_MAIN}/locations`);
 
@@ -110,7 +110,7 @@ const Coupons = () => {
         `${API_HOST}/coupons?type=${data.type}&discount=${data.discount}&expires=${data.expires}&code=${data.code}`,
         { locations: locationIds },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token()}` },
         }
       );
       setSubmitting(false);
@@ -142,7 +142,7 @@ const Coupons = () => {
         `${API_HOST}/coupons/${record.id}?type=${data.type}&discount=${data.discount}&expires=${data.expires}&code=${data.code}`,
         { locations: locationIds },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token()}` },
         }
       );
       setSubmitting(false);
@@ -165,7 +165,7 @@ const Coupons = () => {
     try {
       setSubmitting(true);
       const res = await axios.delete(`${API_HOST}/coupons`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token()}` },
         data: { coupons: couponIds },
       });
       setSubmitting(false);

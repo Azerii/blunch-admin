@@ -43,7 +43,7 @@ const Locations = () => {
     try {
       setLoading(true);
       const res = await axios.get(`${API_HOST}/locations`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token()}` },
       });
 
       if (res.data?.length) {
@@ -68,7 +68,7 @@ const Locations = () => {
         `${API_HOST}/locations?name=${data.name}&delivery_price=${data.delivery_price}`,
         {},
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token()}` },
         }
       );
       setSubmitting(false);
@@ -97,7 +97,7 @@ const Locations = () => {
         `${API_HOST}/locations/${record.id}?name=${data.name}&delivery_price=${data.delivery_price}&active=${data.active}`,
         {},
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token()}` },
         }
       );
       setSubmitting(false);
@@ -120,7 +120,7 @@ const Locations = () => {
     try {
       setSubmitting(true);
       const res = await axios.delete(`${API_HOST}/locations`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token()}` },
         data: { locations: locationIds },
       });
       setSubmitting(false);

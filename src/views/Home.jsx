@@ -90,10 +90,10 @@ const Home = () => {
     try {
       setLoading(true);
       const res_all = await axios.get(`${API_HOST}/orders`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token()}` },
       });
       const res_today = await axios.get(`${API_HOST}/orders/today`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token()}` },
       });
 
       if (res_today?.data?.orders) {
